@@ -74,4 +74,4 @@ The task is episodic, and in order to solve the environment, your agent must get
         cd  %HOMEPATH%\drlnd\p1_navigation
         Jupyter Notebook
 
-2. Click on `Navigation.ipynb` and follow the instructions to get started with training your own agent!  
+2. Click on [Navigation.ipynb](Navigation.ipynb) and follow the instructions to get started with training your own agent!  
