@@ -2,9 +2,13 @@ from unityagents import UnityEnvironment
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+import platform
 from collections import deque
+
 from agent import Agent
 from params import VarParam, DQNParameters
+
+os = platform.system().lower()
 
 
 def dqn_train(agent, env, params, n_episodes=2000, max_t=100000):
@@ -27,7 +31,10 @@ def dqn_train(agent, env, params, n_episodes=2000, max_t=100000):
             action = agent.act(state, params.epsilon())
 
             # Send action to environment
-            env_info = env.step(action.astype(np.int32))[brain_name]
+            if os == 'windows':
+                env_info = env.step(action.astype(np.int32))[brain_name]
+            else:
+                env_info = env.step(action)[brain_name]
 
             # Get next state
             next_state = env_info.vector_observations[0]
@@ -108,7 +115,10 @@ def load_and_run_agent(agent, env, n_episodes):
             action = agent.act(state)
 
             # Send action to the environment
-            env_info = env.step(action.astype(np.int32))[brain_name]
+            if os == 'windows':
+                env_info = env.step(action.astype(np.int32))[brain_name]
+            else:
+                env_info = env.step(action)[brain_name]
 
             # Get the next state
             next_state = env_info.vector_observations[0]
@@ -135,7 +145,12 @@ def load_and_run_agent(agent, env, n_episodes):
 
 
 def main(train_mode=True):
-    env = UnityEnvironment(file_name='Banana.exe')
+    if os == 'linux':
+        env = UnityEnvironment(file_name='Banana_Linux/Banana.x86_64')
+    elif os == 'windows':
+        env = UnityEnvironment(file_name='Banana_Windows_x86_64/Banana.exe')
+    else:
+        env = None
 
     # get the default brain
     brain_name = env.brain_names[0]
