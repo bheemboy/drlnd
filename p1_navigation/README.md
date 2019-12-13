@@ -32,7 +32,7 @@ The task is episodic, and in order to solve the environment, your agent must get
 1. Launch miniconda command prompt and create a new environment.
 
         conda create --name drlnd python=3.6
-        activate drlnd`
+        source activate drlnd
 
 2. Install swig
 
@@ -70,7 +70,7 @@ The task is episodic, and in order to solve the environment, your agent must get
 
 1. Launch miniconda prompt to launch Jupyter notebook
         
-        activate drlnd
+        source activate drlnd
         cd  %HOMEPATH%\drlnd\p1_navigation
         Jupyter Notebook
 

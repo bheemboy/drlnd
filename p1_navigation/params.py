@@ -37,6 +37,9 @@ class DQNParameters:
                  action_size,                            # Number of actions that the agent can take
                  seed=0,                                 #
                  learning_rate=0.0005,                   # learning rate
+                 replay_buffer_size=int(1e6),            # replay buffer size
+                 replay_batch_size=64,                   # minibatch size
+                 learn_every=4,                          # Number of environment steps between every update with experience replay
                  target_update_interval=-1.0,            # The number of learning steps between updating the neural network for fixed Q targets.
                                                          # Set negative to use soft updating instead.
                  alpha=0.6,                              # Exponent for computing priorities in replay buffer
@@ -58,6 +61,9 @@ class DQNParameters:
         self.action_size = action_size
         self.seed = seed
         self.learning_rate = learning_rate
+        self.replay_buffer_size = replay_buffer_size
+        self.replay_batch_size = replay_batch_size
+        self.learn_every = learn_every
         self.target_update_interval = target_update_interval
         self.alpha = alpha
         self.error_clipping = error_clipping

@@ -1,10 +1,10 @@
-from unityagents import UnityEnvironment
-import numpy as np
-import matplotlib.pyplot as plt
-import torch
 import platform
 from collections import deque
+import numpy as np
+import torch
+import matplotlib.pyplot as plt
 
+from unityagents import UnityEnvironment
 from agent import Agent
 from params import VarParam, DQNParameters
 
@@ -46,7 +46,7 @@ def dqn_train(agent, env, params, n_episodes=2000, max_t=100000):
             done = env_info.local_done[0]
 
             # run agent step - which adds to the experience and also learns based on UPDATE_EVERY
-            agent.step(state, action, reward, next_state, done, params.gamma(), params.beta(), params.tau())
+            agent.step(state, action, reward, next_state, done)
 
             score += reward
             state = next_state
