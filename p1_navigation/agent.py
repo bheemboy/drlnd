@@ -8,6 +8,7 @@ from params import DQNParameters
 from model import QNetDueling
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
 
 
 # Modified from the Udacity Deep Reinforcement Learning Nanodegree course materials.
