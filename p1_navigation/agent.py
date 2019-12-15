@@ -5,7 +5,7 @@ import torch.optim as optim
 from replay_buffer import ReplayBuffer
 from params import DQNParameters
 
-from model import QNetDueling
+from model import QNetModel
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
@@ -20,8 +20,8 @@ class Agent:
         self.target_update_counter = 0
 
         # Q-Network
-        self.qnetwork_local = QNetDueling(self.params.state_size, self.params.action_size, self.params.seed).to(device)
-        self.qnetwork_target = QNetDueling(self.params.state_size, self.params.action_size, self.params.seed).to(device)
+        self.qnetwork_local = QNetModel(self.params.state_size, self.params.action_size, self.params.seed).to(device)
+        self.qnetwork_target = QNetModel(self.params.state_size, self.params.action_size, self.params.seed).to(device)
 
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.params.learning_rate)
 
