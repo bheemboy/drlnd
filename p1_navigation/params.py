@@ -35,6 +35,7 @@ class DQNParameters:
     def __init__(self,
                  state_size,                             # Size of state input from environment
                  action_size,                            # Number of actions that the agent can take
+                 hidden_layers=None,                     # Hidden layers
                  seed=0,                                 #
                  learning_rate=0.0005,                   # learning rate
                  replay_buffer_size=int(1e6),            # replay buffer size
@@ -47,6 +48,7 @@ class DQNParameters:
                  gradient_clipping=False,                # Flag for clipping the norm of the gradient to 1
                  reward_clipping=False,                  # Flag for limiting the reward to between -1 and 1
                  prioritized_replay_buffer=True,         # use a prioritized replay buffer
+                 duelling=True,                          # Duelling DQN
                  epsilon=VarParam(1.0, 0.01, 0.005),     # Epsilon-greedy selection of an action. Probably for selecting a random action from the QTable
                  gamma=VarParam(0.9, 0.99, 0.01),        # Discount factor (0 to 1). Higher values favor long term over current rewards.
 
@@ -56,6 +58,10 @@ class DQNParameters:
                  ):
         self.state_size = state_size
         self.action_size = action_size
+        if hidden_layers is None:
+            self.hidden_layers = [64, 64]
+        else:
+            self.hidden_layers = hidden_layers
         self.seed = seed
         self.learning_rate = learning_rate
         self.replay_buffer_size = replay_buffer_size
@@ -67,6 +73,7 @@ class DQNParameters:
         self.gradient_clipping = gradient_clipping
         self.reward_clipping = reward_clipping
         self.prioritized_replay_buffer = prioritized_replay_buffer
+        self.duelling = duelling
         self.epsilon = epsilon
         self.gamma = gamma
         self.beta = beta

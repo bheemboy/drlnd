@@ -1,5 +1,4 @@
 import gym
-import random
 import torch
 import numpy as np
 from collections import deque
@@ -111,6 +110,9 @@ def main(train_mode=True):
     print('States have length:', state_size)
 
     params = DQNParameters(state_size=state_size, action_size=action_size)
+    # params.prioritized_replay_buffer = False
+    # params.hidden_layers = [16, 8, 4]
+    # params.duelling = False
     agent = Agent(params)
 
     if train_mode:
@@ -126,4 +128,4 @@ def main(train_mode=True):
         load_and_run_agent(agent, env, n_episodes=100)
 
 
-main(train_mode=False)
+main(train_mode=True)

@@ -20,8 +20,11 @@ class Agent:
         self.target_update_counter = 0
 
         # Q-Network
-        self.qnetwork_local = QNetModel(self.params.state_size, self.params.action_size, self.params.seed).to(device)
-        self.qnetwork_target = QNetModel(self.params.state_size, self.params.action_size, self.params.seed).to(device)
+        self.qnetwork_local = QNetModel(self.params.state_size, self.params.action_size, self.params.seed,
+                                        hidden_layers=self.params.hidden_layers, duelling=self.params.duelling).to(device)
+        print(self.qnetwork_local)
+        self.qnetwork_target = QNetModel(self.params.state_size, self.params.action_size, self.params.seed,
+                                         hidden_layers=self.params.hidden_layers, duelling=self.params.duelling).to(device)
 
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.params.learning_rate)
 
