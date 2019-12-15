@@ -2,7 +2,7 @@ import numpy as np
 import random
 import torch
 import torch.optim as optim
-from replay_buffer import ReplayBufferPrioritized
+from replay_buffer import ReplayBuffer
 from params import DQNParameters
 
 from model import QNetDueling
@@ -26,7 +26,8 @@ class Agent:
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.params.learning_rate)
 
         # Replay memory
-        self.memory = ReplayBufferPrioritized(self.params.action_size, self.params.replay_buffer_size, self.params.replay_batch_size, self.params.seed, alpha=self.params.alpha)
+        self.memory = ReplayBuffer(self.params.replay_buffer_size, self.params.replay_batch_size, self.params.seed,
+                                   prioritized=self.params.prioritized_replay_buffer, alpha=self.params.alpha)
 
         # Initialize the time step counter for updating each params.learn_every number of steps)
         self.t_step = 0
@@ -36,24 +37,27 @@ class Agent:
         if self.params.reward_clipping:
             reward = np.clip(reward, -1.0, 1.0)
 
-        # Get max predicted Q values (for next states) from target model
-        # Get index to action with maximum value in local network (instead of from target network - double_dqn))
-        next_state_index = self.qnetwork_local(torch.FloatTensor(next_state).to(device)).data
-        max_next_state_index = torch.argmax(next_state_index)
-        # Get action value from target network
-        next_state_Qvalue = self.qnetwork_target(torch.FloatTensor(next_state).to(device)).data
-        max_next_state_Qvalue = next_state_Qvalue[max_next_state_index]
+        if self.params.prioritized_replay_buffer:
+            # Get max predicted Q values (for next states) from target model
+            # Get index to action with maximum value in local network (instead of from target network - double_dqn))
+            next_state_index = self.qnetwork_local(torch.FloatTensor(next_state).to(device)).data
+            max_next_state_index = torch.argmax(next_state_index)
+            # Get action value from target network
+            next_state_Qvalue = self.qnetwork_target(torch.FloatTensor(next_state).to(device)).data
+            max_next_state_Qvalue = next_state_Qvalue[max_next_state_index]
 
-        target = reward + self.params.gamma() * max_next_state_Qvalue * (1 - done)
-        old = self.qnetwork_local(torch.FloatTensor(state).to(device)).data[action]
-        error = abs(old.item() - target.item())
+            target = reward + self.params.gamma() * max_next_state_Qvalue * (1 - done)
+            old = self.qnetwork_local(torch.FloatTensor(state).to(device)).data[action]
+            error = abs(old.item() - target.item())
 
-        # TD error clipping
-        if self.params.error_clipping and error > 1:
-            error = 1
+            # TD error clipping
+            if self.params.error_clipping and error > 1:
+                error = 1
 
-        # Save experience in replay memory
-        self.memory.add(state, action, reward, next_state, done, error)
+            # Save experience in replay memory
+            self.memory.add(state, action, reward, next_state, done, error)
+        else:
+            self.memory.add(state, action, reward, next_state, done)
 
         # Learn every params.learn_every time steps.
         self.t_step = (self.t_step + 1) % self.params.learn_every
@@ -88,7 +92,10 @@ class Agent:
         ======
             experiences (Tuple[torch.Variable]): tuple of (s, a, r, s', done) tuples
         """
-        states, actions, rewards, next_states, dones, priorities = experiences
+        if self.params.prioritized_replay_buffer:
+            states, actions, rewards, next_states, dones, priorities = experiences
+        else:
+            states, actions, rewards, next_states, dones = experiences
 
         # Get max predicted Q values (for next states) from target model
         # Get index to action with maximum value in local network (instead of from target network - double_dqn))
@@ -109,12 +116,13 @@ class Agent:
         if self.params.error_clipping:
             torch.clamp(errors, min=-1, max=1)
 
-        # beta = 1.0
-        Pi = priorities / priorities.sum()
-        wi = (1.0 / self.params.replay_buffer_size / Pi) ** self.params.beta()
-        # Normalize wi as per Schaul et al., Prioritized Replay, ICLR 2016, https://arxiv.org/abs/1511.05952
-        wi = wi/max(wi)
-        errors *= wi
+        if self.params.prioritized_replay_buffer:
+            # beta = 1.0
+            Pi = priorities / priorities.sum()
+            wi = (1.0 / self.params.replay_buffer_size / Pi) ** self.params.beta()
+            # Normalize wi as per Schaul et al., Prioritized Replay, ICLR 2016, https://arxiv.org/abs/1511.05952
+            wi = wi/max(wi)
+            errors *= wi
         loss = (errors ** 2).mean()
 
         # loss = F.mse_loss(predicted_Qvalues, target_Qvalues)
