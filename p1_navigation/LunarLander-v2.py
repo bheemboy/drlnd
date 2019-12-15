@@ -126,4 +126,4 @@ def main(train_mode=True):
         load_and_run_agent(agent, env, n_episodes=100)
 
 
-main(train_mode=True)
+main(train_mode=False)
