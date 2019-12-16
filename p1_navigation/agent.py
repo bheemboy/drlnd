@@ -210,7 +210,7 @@ class DQNAgent:
                 passing_score_achieved = True
                 print(f'\rPassing score achieved in {i_episode} episodes!\tAverage Score: {np.mean(scores_window):.4f}')
 
-            torch.save(self.qnetwork_local.state_dict(), self.model_name)
+        torch.save(self.qnetwork_local.state_dict(), self.model_name)
 
         return scores
 
