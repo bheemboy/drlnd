@@ -1,5 +1,7 @@
 import numpy as np
 import random
+import sys
+from collections import deque
 import torch
 import torch.optim as optim
 from replay_buffer import ReplayBuffer
@@ -14,9 +16,10 @@ print(device)
 # Modified from the Udacity Deep Reinforcement Learning Nanodegree course materials.
 # Added options for modifying the Q learning, such as double DQN, dueling DQN, and
 # prioritized experience replay.
-class Agent:
-    def __init__(self, params):
+class DQNAgent:
+    def __init__(self, params, model_name='temp.pth'):
         self.params = params
+        self.model_name = model_name
         self.target_update_counter = 0
 
         # Q-Network
@@ -156,3 +159,93 @@ class Agent:
     def soft_update(self):
         for target_param, local_param in zip(self.qnetwork_target.parameters(), self.qnetwork_local.parameters()):
             target_param.data.copy_(self.params.tau() * local_param.data + (1.0 - self.params.tau()) * target_param.data)
+
+    def env_reset(self, train_mode=True):
+        raise Exception('env_reset method should be overridden.')
+
+    def env_step(self, action, train_mode=True):
+        raise Exception('env_step method should be overridden.')
+
+    def train(self, n_episodes=2000, max_t=100000, passing_score=sys.maxsize):
+        passing_score_achieved = False
+        scores = []  # List of scores for an episode
+        scores_window = deque(maxlen=100)  # Most recent 100 scores
+
+        for i_episode in range(1, n_episodes + 1):
+            # Reset environment
+            state = self.env_reset(True)
+            score = 0
+            for t in range(max_t):
+
+                # Get action
+                action = self.act(state, self.params.epsilon())
+
+                # Send action to environment
+                next_state, reward, done = self.env_step(action, True)
+
+                # run agent step - which adds to the experience and also learns based on UPDATE_EVERY
+                self.step(state, action, reward, next_state, done)
+
+                score += reward
+                state = next_state
+
+                # Exit if episode finished
+                if done:
+                    break
+
+            scores_window.append(score)
+            scores.append(score)
+
+            self.params.epsilon.decrement()  # reduce randomness for action selection
+            self.params.gamma.increment()  # give more priority to future returns
+            self.params.tau.increment()  # make larger updates to target DQN
+            self.params.beta.increment()  # increase bias for weights from stored experiences
+
+            if i_episode % scores_window.maxlen == 0:
+                print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.4f}\t{self.params}')
+            else:
+                print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.4f}\t{self.params}', end="")
+
+            if np.mean(scores_window) >= passing_score and not passing_score_achieved:
+                passing_score_achieved = True
+                print(f'\rPassing score achieved in {i_episode} episodes!\tAverage Score: {np.mean(scores_window):.4f}')
+
+            torch.save(self.qnetwork_local.state_dict(), self.model_name)
+
+        return scores
+
+    def test(self, n_episodes=100, max_t=sys.maxsize):
+        """
+        agent: the learning agent
+        checkpoint: the saved weights for the pretrained neural network
+        n_episodes: the number of episodes to run
+        """
+        # load the weights from file
+        self.qnetwork_local.load_state_dict(torch.load(self.model_name))
+        total_score = 0
+
+        for i in range(n_episodes):
+
+            # Reset the environment. Training mode is off.
+            state = self.env_reset(False)
+            score = 0
+
+            for t in range(max_t):
+                # Decide on an action given the current state
+                action = self.act(state)
+
+                # Send action to environment
+                next_state, reward, done = self.env_step(action, False)
+
+                # Add the current reward into the score
+                score += reward
+                state = next_state
+
+                # Exit the loop when the episode is done
+                if done:
+                    break
+
+            total_score += score
+            print(f'Episode {i} Score: {score}')
+
+        print(f'Average Score: {total_score / n_episodes}')
