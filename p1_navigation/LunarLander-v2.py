@@ -36,15 +36,15 @@ class LunarLander(DQNAgent):
 
 
 dqn = LunarLander()
-scores = dqn.train(passing_score=200)
+# scores = dqn.train(passing_score=200)
 
 # plot the scores
-plt.ion()
-fig = plt.figure()
-ax = fig.add_subplot(111)
-plt.plot(np.arange(len(scores)), scores)
-plt.ylabel('Score')
-plt.xlabel('Episode #')
-plt.show()
+# plt.ion()
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# plt.plot(np.arange(len(scores)), scores)
+# plt.ylabel('Score')
+# plt.xlabel('Episode #')
+# plt.show()
 
-# dqn.test()
+dqn.test()
