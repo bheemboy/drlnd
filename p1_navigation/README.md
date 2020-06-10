@@ -31,7 +31,7 @@ The task is episodic, and in order to solve the environment, your agent must get
 
 1. Launch miniconda command prompt and create a new environment.
 
-        conda create --name drlnd python=3.6
+        conda create --name drlnd python=3.6.9
         source activate drlnd
 
 2. Install swig
