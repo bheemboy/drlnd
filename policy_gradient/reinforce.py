@@ -15,10 +15,10 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Policy(nn.Module):
-    def __init__(self, s_size=4, h_size=16, a_size=2):
+    def __init__(self, state_size=4, hidden_size=16, action_size=2):
         super(Policy, self).__init__()
-        self.fc1 = nn.Linear(s_size, h_size)
-        self.fc2 = nn.Linear(h_size, a_size)
+        self.fc1 = nn.Linear(state_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, action_size)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
