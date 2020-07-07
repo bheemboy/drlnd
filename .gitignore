@@ -1,5 +1,5 @@
-/p1_navigation/.idea/
-/p1_navigation/__pycache__/
+__pycache__/
+.ipynb_checkpoints/
 /p1_navigation/Banana_Linux/
 /p1_navigation/Banana_Windows_x86_64/
 /p1_navigation/unity-environment.log
